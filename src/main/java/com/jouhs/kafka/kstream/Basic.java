@@ -26,7 +26,7 @@ public class Basic {
         final StreamsBuilder builder = new StreamsBuilder();
         KStream<String, String> source = builder.stream(INPUT_TOPIC);
 
-        source = source.filter((k, v) -> {return v.length() > 5? true:false;});
+        source = source.mapValues((k,v) -> { return v.toUpperCase();});
 
         source.to(OUTPUT_TOPIC, Produced.with(Serdes.String(),Serdes.String()));
 
