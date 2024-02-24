@@ -29,13 +29,8 @@ public class Basic {
         final StreamsBuilder builder = new StreamsBuilder();
         KStream<String, String> source = builder.stream(INPUT_TOPIC);
 
-        source = source.flatMap((k,v) -> {
-            var tokens = v.split(" "); // String[]
-            List<KeyValue<String, String>> result = new ArrayList<>(tokens.length);
-            for(String token: tokens) {
-                result.add(new KeyValue<>(k, token));
-            }
-            return result;
+        source.foreach((k,v) -> {
+            System.out.println("value: "+v);
         });
 
         source.to(OUTPUT_TOPIC, Produced.with(Serdes.String(),Serdes.String()));
