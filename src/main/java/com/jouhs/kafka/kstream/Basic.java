@@ -3,11 +3,14 @@ package com.jouhs.kafka.kstream;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -26,7 +29,14 @@ public class Basic {
         final StreamsBuilder builder = new StreamsBuilder();
         KStream<String, String> source = builder.stream(INPUT_TOPIC);
 
-        source = source.mapValues((k,v) -> { return v.toUpperCase();});
+        source = source.flatMap((k,v) -> {
+            var tokens = v.split(" "); // String[]
+            List<KeyValue<String, String>> result = new ArrayList<>(tokens.length);
+            for(String token: tokens) {
+                result.add(new KeyValue<>(k, token));
+            }
+            return result;
+        });
 
         source.to(OUTPUT_TOPIC, Produced.with(Serdes.String(),Serdes.String()));
 
